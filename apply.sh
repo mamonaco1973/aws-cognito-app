@@ -72,7 +72,6 @@ if [[ "${REGION}" == "None" ]]; then
 fi
 
 echo "NOTE: Bucket name is ${BUCKET_NAME}"
-exit 0
 
 # --------------------------------------------------------------------------------
 # BUILD SIMPLE WEB APPLICATION
