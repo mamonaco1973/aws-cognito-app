@@ -90,7 +90,7 @@ resource "aws_cognito_user_pool_client" "spa" {
   supported_identity_providers = ["COGNITO"]
 
   callback_urls = [
-    "${var.spa_origin}/index.html"
+    "${var.spa_origin}/callback.html"
   ]
 
   logout_urls = [
