@@ -97,7 +97,7 @@ resource "aws_s3_object" "index_html" {
 # Description:
 #   Uploads the config.json for callback.html
 # --------------------------------------------------------------------------------
-resource "aws_s3_object" "config.json" {
+resource "aws_s3_object" "config_sjson" {
   bucket       = aws_s3_bucket.web_bucket.id
   key          = "config.json"
   source       = "${path.module}/config.json"
@@ -112,7 +112,7 @@ resource "aws_s3_object" "config.json" {
 # Description:
 #   Uploads the callback.html
 # --------------------------------------------------------------------------------
-resource "aws_s3_object" "callback.html" {
+resource "aws_s3_object" "callback_html" {
   bucket       = aws_s3_bucket.web_bucket.id
   key          = "callback.html"
   source       = "${path.module}/callback.html"
