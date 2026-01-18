@@ -16,6 +16,16 @@ export AWS_DEFAULT_REGION="us-east-1"
 set -euo pipefail
 
 # --------------------------------------------------------------------------------
+# DESTROY COGNITO CONFIGURATION
+# --------------------------------------------------------------------------------
+echo "NOTE: Destroying Cognito Configuration..."
+
+cd 03-cognito || { echo "ERROR: Directory 03-cognito not found."; exit 1; }
+terraform init
+terraform destroy -auto-approve
+cd .. || exit
+
+# --------------------------------------------------------------------------------
 # DESTROY WEB APPLICATION
 # --------------------------------------------------------------------------------
 # Destroys the S3 static web app and supporting Terraform resources

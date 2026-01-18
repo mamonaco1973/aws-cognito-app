@@ -70,6 +70,19 @@ terraform apply -auto-approve
 cd .. || exit
 
 # --------------------------------------------------------------------------------
+# BUILD COGNITO BASED AUTHENTICATION
+# --------------------------------------------------------------------------------
+
+echo "NOTE: Building Cognito Configuration"
+
+cd 03-cognito || { echo "ERROR: 03-cognito directory missing."; exit 1; }
+
+terraform init
+terraform apply -auto-approve
+
+cd .. || exit
+
+# --------------------------------------------------------------------------------
 # BUILD VALIDATION
 # --------------------------------------------------------------------------------
 # Optionally runs post-deployment validation once implemented.
