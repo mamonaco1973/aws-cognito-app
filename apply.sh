@@ -71,6 +71,8 @@ if [[ "${REGION}" == "None" ]]; then
   REGION="us-east-1"
 fi
 
+BUCKET_URL="https://${BUCKET_NAME}.s3.${REGION}.amazonaws.com"
+
 echo "NOTE: Bucket name is ${BUCKET_NAME}"
 
 # --------------------------------------------------------------------------------
@@ -104,6 +106,30 @@ envsubst '${API_BASE}' < index.html.tmpl > index.html || {
   echo "ERROR: Failed to generate index.html file. Exiting."
   exit 1
 }
+
+echo "NOTE: Reading Cognito outputs..."
+
+COGNITO_DOMAIN_PREFIX=$(cd ../01-lambdas && terraform output -raw cognito_domain)
+CLIENT_ID=$(cd ../01-lambdas && terraform output -raw app_client_id)
+
+if [[ -z "${COGNITO_DOMAIN_PREFIX}" || -z "${CLIENT_ID}" ]]; then
+   echo "ERROR: Failed to read Cognito outputs"
+   exit 1
+fi
+COGNITO_DOMAIN="${COGNITO_DOMAIN_PREFIX}.auth.${REGION}.amazoncognito.com"
+
+echo "NOTE: Writing config.json..."
+
+cat > config.json <<EOF
+{
+  "cognitoDomain": "${COGNITO_DOMAIN}",
+  "clientId": "${CLIENT_ID}",
+  "redirectUri": "${BUCKET_URL}/callback.html",
+  "apiBaseUrl": "${API_BASE}"
+}
+EOF
+
+exit 0
 
 terraform init
 terraform apply -auto-approve
