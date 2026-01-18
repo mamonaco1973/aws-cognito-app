@@ -92,6 +92,36 @@ resource "aws_s3_object" "index_html" {
 }
 
 # --------------------------------------------------------------------------------
+# RESOURCE: aws_s3_object.config.json
+# --------------------------------------------------------------------------------
+# Description:
+#   Uploads the config.json for callback.html
+# --------------------------------------------------------------------------------
+resource "aws_s3_object" "config.json" {
+  bucket       = aws_s3_bucket.web_bucket.id
+  key          = "config.json"
+  source       = "${path.module}/config.json"
+  content_type = "application/json"
+  cache_control = "no-store, max-age=0"
+  depends_on = [aws_s3_bucket_policy.public_policy]
+}
+
+# --------------------------------------------------------------------------------
+# RESOURCE: aws_s3_object.callback.html
+# --------------------------------------------------------------------------------
+# Description:
+#   Uploads the callback.html
+# --------------------------------------------------------------------------------
+resource "aws_s3_object" "callback.html" {
+  bucket       = aws_s3_bucket.web_bucket.id
+  key          = "callback.html"
+  source       = "${path.module}/callback.html"
+  content_type = "text/html"
+  cache_control = "no-store, max-age=0"
+  depends_on = [aws_s3_bucket_policy.public_policy]
+}
+
+# --------------------------------------------------------------------------------
 # DATA: aws_region.current
 # --------------------------------------------------------------------------------
 # Description:

@@ -1,0 +1,6 @@
+{
+  "cognitoDomain": "${COGNITO_DOMAIN}",
+  "clientId": "${CLIENT_ID}",
+  "redirectUri": "${BUCKET_URL}/callback.html",
+  "apiBaseUrl": "${API_BASE}"
+}
