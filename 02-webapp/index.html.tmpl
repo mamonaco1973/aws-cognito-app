@@ -167,7 +167,13 @@
 <body>
 
 <header>
-  <h1>Notes Demo</h1>
+  <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+    <h1>Notes Demo</h1>
+    <div style="display:flex; gap:8px;">
+      <button id="btnLogin" class="secondary">Sign in</button>
+      <button id="btnLogout" class="secondary" style="display:none;">Sign out</button>
+    </div>
+  </div>
 </header>
 
 <main>
@@ -226,7 +232,109 @@
 
 <script>
   // ===================== Config =====================
+  // NOTE: Leave API_BASE_URL as-is for first pass. We are only wiring login.
   const API_BASE_URL = "${API_BASE}";
+
+  // Cognito runtime config loaded from /config.json
+  let AUTH = null;
+
+  async function loadAuthConfig() {
+    const res = await fetch("/config.json", { cache: "no-store" });
+    if (!res.ok) throw new Error("Failed to load /config.json (" + res.status + ")");
+    AUTH = await res.json();
+
+    if (!AUTH.cognitoDomain || !AUTH.clientId || !AUTH.redirectUri) {
+      throw new Error("config.json missing cognitoDomain/clientId/redirectUri");
+    }
+  }
+
+  function hasAccessToken() {
+    return !!sessionStorage.getItem("access_token");
+  }
+
+  function updateAuthButtons() {
+    const loggedIn = hasAccessToken();
+    document.getElementById("btnLogin").style.display = loggedIn ? "none" : "inline-block";
+    document.getElementById("btnLogout").style.display = loggedIn ? "inline-block" : "none";
+  }
+
+  // ===================== OAuth / PKCE =====================
+  function base64UrlEncode(bytes) {
+    let bin = "";
+    const arr = new Uint8Array(bytes);
+    for (let i = 0; i < arr.length; i++) bin += String.fromCharCode(arr[i]);
+    return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+  }
+
+  async function sha256(str) {
+    const enc = new TextEncoder().encode(str);
+    const hash = await crypto.subtle.digest("SHA-256", enc);
+    return new Uint8Array(hash);
+  }
+
+  function randomString(len = 64) {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
+    const bytes = new Uint8Array(len);
+    crypto.getRandomValues(bytes);
+    let out = "";
+    for (let i = 0; i < bytes.length; i++) out += chars[bytes[i] % chars.length];
+    return out;
+  }
+
+  async function startLogin() {
+    if (!AUTH) {
+      setListStatus("Auth config not loaded yet.");
+      return;
+    }
+
+    // PKCE: verifier + challenge
+    const verifier = randomString(64);
+    const challenge = base64UrlEncode(await sha256(verifier));
+
+    // state for CSRF protection
+    const state = randomString(24);
+
+    sessionStorage.setItem("pkce_code_verifier", verifier);
+    sessionStorage.setItem("oauth_state", state);
+
+    const authorizeUrl =
+      "https://" + AUTH.cognitoDomain + "/oauth2/authorize" +
+      "?client_id=" + encodeURIComponent(AUTH.clientId) +
+      "&response_type=code" +
+      "&scope=" + encodeURIComponent("openid email profile") +
+      "&redirect_uri=" + encodeURIComponent(AUTH.redirectUri) +
+      "&state=" + encodeURIComponent(state) +
+      "&code_challenge=" + encodeURIComponent(challenge) +
+      "&code_challenge_method=S256";
+
+    window.location.href = authorizeUrl;
+  }
+
+  function startLogout() {
+    if (!AUTH) {
+      setListStatus("Auth config not loaded yet.");
+      return;
+    }
+
+    // Clear local session first (so UI updates even if logout navigation fails)
+    sessionStorage.removeItem("access_token");
+    sessionStorage.removeItem("id_token");
+    sessionStorage.removeItem("refresh_token");
+    sessionStorage.removeItem("expires_in");
+    sessionStorage.removeItem("token_received_at");
+    sessionStorage.removeItem("pkce_code_verifier");
+    sessionStorage.removeItem("oauth_state");
+
+    updateAuthButtons();
+
+    // Cognito Hosted UI logout
+    const logoutUrl =
+      "https://" + AUTH.cognitoDomain + "/logout" +
+      "?client_id=" + encodeURIComponent(AUTH.clientId) +
+      "&logout_uri=" + encodeURIComponent(window.location.origin + "/index.html");
+
+    window.location.href = logoutUrl;
+  }
 
   // ===================== State ======================
   let notes = [];
@@ -437,8 +545,28 @@
   document.getElementById("btnModalCancel").addEventListener("click", closeModal);
   document.getElementById("btnModalCreate").addEventListener("click", createFromModal);
 
+  document.getElementById("btnLogin").addEventListener("click", () => {
+    setListStatus("Redirecting to sign-in...");
+    startLogin().catch(e => setListStatus("Login error: " + e.message));
+  });
+
+  document.getElementById("btnLogout").addEventListener("click", () => {
+    setListStatus("Signing out...");
+    startLogout();
+  });
+
   // ===================== Init =======================
-  loadNotes();
+  (async function init() {
+    try {
+      await loadAuthConfig();
+      updateAuthButtons();
+    } catch (e) {
+      // Login will not work without config.json, but notes can still load.
+      setListStatus("Auth init warning: " + e.message);
+    } finally {
+      loadNotes();
+    }
+  })();
 </script>
 
 </body>
