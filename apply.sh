@@ -127,8 +127,8 @@ terraform apply -auto-approve \
 
 echo "NOTE: Reading Cognito outputs..."
 
-COGNITO_DOMAIN=$(cd 03-cognito && terraform output -raw cognito_domain)
-CLIENT_ID=$(cd 03-cognito && terraform output -raw app_client_id)
+COGNITO_DOMAIN=$(terraform output -raw cognito_domain)
+CLIENT_ID=$(terraform output -raw app_client_id)
 
 if [[ -z "${COGNITO_DOMAIN}" || -z "${CLIENT_ID}" ]]; then
   echo "ERROR: Failed to read Cognito outputs"
