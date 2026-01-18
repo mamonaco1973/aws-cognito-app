@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0"/>
+  <meta http-equiv="Cache-Control"
+        content="no-store, no-cache, must-revalidate, max-age=0"/>
   <meta http-equiv="Pragma" content="no-cache"/>
   <meta http-equiv="Expires" content="0"/>
   <title>Notes Demo</title>
@@ -232,7 +233,7 @@
 
 <script>
   // ===================== Config =====================
-  // NOTE: Leave API_BASE_URL as-is for first pass. We are only wiring login.
+  // NOTE: Keep API_BASE_URL as-is. We are gating UI on login first.
   const API_BASE_URL = "${API_BASE}";
 
   // Cognito runtime config loaded from /config.json
@@ -248,14 +249,34 @@
     }
   }
 
-  function hasAccessToken() {
+  // ===================== Auth State =====================
+  function isAuthenticated() {
     return !!sessionStorage.getItem("access_token");
   }
 
   function updateAuthButtons() {
-    const loggedIn = hasAccessToken();
-    document.getElementById("btnLogin").style.display = loggedIn ? "none" : "inline-block";
+    const loggedIn = isAuthenticated();
+    document.getElementById("btnLogin").style.display  = loggedIn ? "none" : "inline-block";
     document.getElementById("btnLogout").style.display = loggedIn ? "inline-block" : "none";
+  }
+
+  function setUiEnabled(enabled) {
+    // Leave header buttons alone; we manage those separately
+    const selectors = [
+      "#btnRefresh", "#btnNew", "#btnSave", "#btnDelete",
+      "#title", "#note",
+      "#modalTitle", "#modalNote",
+      "#btnModalCancel", "#btnModalCreate"
+    ];
+
+    selectors.forEach(sel => {
+      const el = document.querySelector(sel);
+      if (el) el.disabled = !enabled;
+    });
+
+    // Disable note list clicks when logged out
+    document.getElementById("notes").style.pointerEvents = enabled ? "auto" : "none";
+    document.getElementById("notes").style.opacity = enabled ? "1" : "0.6";
   }
 
   // ===================== OAuth / PKCE =====================
@@ -316,7 +337,7 @@
       return;
     }
 
-    // Clear local session first (so UI updates even if logout navigation fails)
+    // Clear local session first
     sessionStorage.removeItem("access_token");
     sessionStorage.removeItem("id_token");
     sessionStorage.removeItem("refresh_token");
@@ -325,7 +346,10 @@
     sessionStorage.removeItem("pkce_code_verifier");
     sessionStorage.removeItem("oauth_state");
 
+    // Lock UI immediately
+    setUiEnabled(false);
     updateAuthButtons();
+    setListStatus("Signed out.");
 
     // Cognito Hosted UI logout
     const logoutUrl =
@@ -477,7 +501,9 @@
     if (notes.length === 0) {
       const empty = document.createElement("div");
       empty.className = "status";
-      empty.textContent = "No notes yet. Click New to create one.";
+      empty.textContent = isAuthenticated()
+        ? "No notes yet. Click New to create one."
+        : "Please sign in to view notes.";
       elNotes.appendChild(empty);
     }
   }
@@ -537,13 +563,47 @@
   });
 
   // ===================== Wiring =====================
-  document.getElementById("btnRefresh").addEventListener("click", loadNotes);
-  document.getElementById("btnNew").addEventListener("click", openModal);
-  document.getElementById("btnSave").addEventListener("click", saveNote);
-  document.getElementById("btnDelete").addEventListener("click", deleteNote);
+  document.getElementById("btnRefresh").addEventListener("click", () => {
+    if (!isAuthenticated()) {
+      setListStatus("Please sign in to continue.");
+      return;
+    }
+    loadNotes();
+  });
+
+  document.getElementById("btnNew").addEventListener("click", () => {
+    if (!isAuthenticated()) {
+      setListStatus("Please sign in to continue.");
+      return;
+    }
+    openModal();
+  });
+
+  document.getElementById("btnSave").addEventListener("click", () => {
+    if (!isAuthenticated()) {
+      setStatus("Please sign in to continue.");
+      return;
+    }
+    saveNote();
+  });
+
+  document.getElementById("btnDelete").addEventListener("click", () => {
+    if (!isAuthenticated()) {
+      setStatus("Please sign in to continue.");
+      return;
+    }
+    deleteNote();
+  });
 
   document.getElementById("btnModalCancel").addEventListener("click", closeModal);
-  document.getElementById("btnModalCreate").addEventListener("click", createFromModal);
+
+  document.getElementById("btnModalCreate").addEventListener("click", () => {
+    if (!isAuthenticated()) {
+      modalStatus.textContent = "Please sign in to continue.";
+      return;
+    }
+    createFromModal();
+  });
 
   document.getElementById("btnLogin").addEventListener("click", () => {
     setListStatus("Redirecting to sign-in...");
@@ -557,14 +617,26 @@
 
   // ===================== Init =======================
   (async function init() {
+    // Lock everything by default
+    setUiEnabled(false);
+    setListStatus("Please sign in to continue.");
+    renderNotes();
+
     try {
       await loadAuthConfig();
       updateAuthButtons();
+
+      if (!isAuthenticated()) {
+        // Stay locked until the user signs in
+        return;
+      }
+
+      // Logged in: enable UI and load data
+      setUiEnabled(true);
+      await loadNotes();
     } catch (e) {
-      // Login will not work without config.json, but notes can still load.
-      setListStatus("Auth init warning: " + e.message);
-    } finally {
-      loadNotes();
+      // If auth config isn't available, keep everything locked
+      setListStatus("Auth init error: " + e.message);
     }
   })();
 </script>
