@@ -129,11 +129,8 @@ cat > config.json <<EOF
 }
 EOF
 
-exit 0
-
 terraform init
 terraform apply -auto-approve
-
 
 cd .. || exit
 
