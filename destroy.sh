@@ -57,19 +57,19 @@ if [[ "${REGION}" == "None" ]]; then
   REGION="us-east-1"
 fi
 
-# ------------------------------------------------------------------
-# Construct S3 HTTPS URL
-# ------------------------------------------------------------------
-BUCKET_URL="https://${BUCKET_NAME}.s3.${REGION}.amazonaws.com"
+# # ------------------------------------------------------------------
+# # Construct S3 HTTPS URL
+# # ------------------------------------------------------------------
+# BUCKET_URL="https://${BUCKET_NAME}.s3.${REGION}.amazonaws.com"
 
-echo "NOTE: Destroying Cognito Configuration..."
+# echo "NOTE: Destroying Cognito Configuration..."
 
-cd 03-cognito || { echo "ERROR: Directory 03-cognito not found."; exit 1; }
-terraform init
-terraform destroy -auto-approve \
-  -var="spa_origin=${BUCKET_URL}"
+# cd 03-cognito || { echo "ERROR: Directory 03-cognito not found."; exit 1; }
+# terraform init
+# terraform destroy -auto-approve \
+#   -var="spa_origin=${BUCKET_URL}"
 
-cd .. || exit
+# cd .. || exit
 
 # --------------------------------------------------------------------------------
 # DESTROY WEB APPLICATION
