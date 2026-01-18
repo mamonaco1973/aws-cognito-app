@@ -2,17 +2,18 @@
 # File: delete.py
 # ================================================================================
 # Purpose:
-#   Lambda handler for deleting a note by ID.
+#   Lambda handler for deleting a note in the Notes API.
 #
-# Simplified Demo Behavior:
-#   - Uses a fixed owner value ("global")
-#   - Reads note ID from the request path
-#   - Deletes the note from DynamoDB
-#   - Returns 404 if the note does not exist
+# Updated Behavior:
+#   - Derives owner from the Cognito JWT (access token) claim "sub"
+#   - Deletes only if the note belongs to the authenticated owner
 #
 # DynamoDB Schema:
 #   PK: owner (string)
 #   SK: id    (string, UUID)
+#
+# Expected Path:
+#   DELETE /notes/{id}
 # ================================================================================
 
 import json
@@ -26,7 +27,6 @@ from botocore.exceptions import ClientError
 # --------------------------------------------------------------------------------
 
 TABLE_NAME = os.environ.get("NOTES_TABLE_NAME", "").strip()
-OWNER      = "global"
 
 dynamodb = boto3.resource("dynamodb")
 
@@ -47,16 +47,29 @@ def _require_env() -> None:
     if not TABLE_NAME:
         raise ValueError("NOTES_TABLE_NAME environment variable is required")
 
-def _get_note_id(event: dict) -> str:
+def _get_owner(event: dict) -> str:
+    """
+    Extract the authenticated user identifier from the API Gateway HTTP API
+    JWT authorizer context.
+
+    Expected path (HTTP API v2 + JWT authorizer):
+      event["requestContext"]["authorizer"]["jwt"]["claims"]["sub"]
+    """
     try:
-        return (
-            event
-            .get("pathParameters", {})
-            .get("id", "")
-            .strip()
-        )
-    except AttributeError:
-        return ""
+        claims = event["requestContext"]["authorizer"]["jwt"]["claims"]
+        owner = str(claims.get("sub", "")).strip()
+        if not owner:
+            raise KeyError("sub claim missing")
+        return owner
+    except Exception:
+        raise ValueError("Unauthorized: missing or invalid JWT claims")
+
+def _get_note_id(event: dict) -> str:
+    path_params = event.get("pathParameters") or {}
+    note_id = str(path_params.get("id", "")).strip()
+    if not note_id:
+        raise ValueError("id path parameter is required")
+    return note_id
 
 # --------------------------------------------------------------------------------
 # Lambda Handler
@@ -73,34 +86,32 @@ def lambda_handler(event, context):
         return _response(500, {"error": str(exc)})
 
     # --------------------------------------------------------------------------
-    # Read note ID from path
+    # Determine owner + note id
     # --------------------------------------------------------------------------
-    note_id = _get_note_id(event)
-
-    if not note_id:
-        return _response(400, {"error": "Note id is required"})
+    try:
+        owner  = _get_owner(event)
+        note_id = _get_note_id(event)
+    except ValueError as exc:
+        # Unauthorized is 401; missing id is 400
+        msg = str(exc)
+        if msg.startswith("Unauthorized:"):
+            return _response(401, {"error": msg})
+        return _response(400, {"error": msg})
 
     # --------------------------------------------------------------------------
-    # Delete item
+    # Delete item (scoped to owner)
     # --------------------------------------------------------------------------
     try:
         table.delete_item(
             Key={
-                "owner": OWNER,
-                "id":    note_id
-            },
-            ConditionExpression="attribute_exists(#id)",
-            ExpressionAttributeNames={
-                "#id": "id"
+                "owner": owner,
+                "id": note_id
             }
         )
-    except ClientError as exc:
-        code = exc.response.get("Error", {}).get("Code", "")
-        if code == "ConditionalCheckFailedException":
-            return _response(404, {"error": "Note not found"})
+    except ClientError:
         return _response(500, {"error": "Failed to delete note"})
 
-    return _response(
-        200,
-        {"message": "Note deleted"}
-    )
+    # --------------------------------------------------------------------------
+    # Success response
+    # --------------------------------------------------------------------------
+    return _response(200, {"deleted": True, "id": note_id})

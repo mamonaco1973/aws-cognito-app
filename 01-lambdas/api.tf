@@ -28,9 +28,36 @@ resource "aws_apigatewayv2_api" "notes_api" {
   cors_configuration {
     allow_origins  = ["*"]  # Restrict to domain in production
     allow_methods  = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
-    allow_headers  = ["content-type"]
+    allow_headers  = ["content-type", "authorization"]
     expose_headers = ["content-type"]
     max_age        = 300
+  }
+}
+
+# --------------------------------------------------------------------------------
+# RESOURCE: aws_apigatewayv2_authorizer.cognito_jwt
+# --------------------------------------------------------------------------------
+# Description:
+#   Configures an HTTP API JWT authorizer that validates Cognito access tokens.
+#
+# Notes:
+#   - Uses the Cognito Hosted UI domain + region to build the issuer.
+#   - Uses the SPA app client id as the JWT audience.
+# --------------------------------------------------------------------------------
+resource "aws_apigatewayv2_authorizer" "cognito_jwt" {
+  api_id          = aws_apigatewayv2_api.notes_api.id
+  name            = "cognito-jwt"
+  authorizer_type = "JWT"
+
+  identity_sources = ["$request.header.Authorization"]
+
+  jwt_configuration {
+    audience = [aws_cognito_user_pool_client.spa.id]
+    issuer = format(
+      "https://%s.auth.%s.amazoncognito.com/",
+      aws_cognito_user_pool_domain.this.domain,
+      data.aws_region.current.id
+    )
   }
 }
 
@@ -119,6 +146,8 @@ resource "aws_apigatewayv2_route" "create_note_route" {
   api_id    = aws_apigatewayv2_api.notes_api.id
   route_key = "POST /notes"
   target    = "integrations/${aws_apigatewayv2_integration.create_note_integration.id}"
+  authorization_type = "JWT"
+  authorizer_id      = aws_apigatewayv2_authorizer.cognito_jwt.id
 }
 
 # --------------------------------------------------------------------------------
@@ -131,6 +160,9 @@ resource "aws_apigatewayv2_route" "list_notes_route" {
   api_id    = aws_apigatewayv2_api.notes_api.id
   route_key = "GET /notes"
   target    = "integrations/${aws_apigatewayv2_integration.list_notes_integration.id}"
+  authorization_type = "JWT"
+  authorizer_id      = aws_apigatewayv2_authorizer.cognito_jwt.id
+
 }
 
 # --------------------------------------------------------------------------------
@@ -143,6 +175,8 @@ resource "aws_apigatewayv2_route" "get_note_route" {
   api_id    = aws_apigatewayv2_api.notes_api.id
   route_key = "GET /notes/{id}"
   target    = "integrations/${aws_apigatewayv2_integration.get_note_integration.id}"
+  authorization_type = "JWT"
+  authorizer_id      = aws_apigatewayv2_authorizer.cognito_jwt.id
 }
 
 # --------------------------------------------------------------------------------
@@ -155,6 +189,8 @@ resource "aws_apigatewayv2_route" "update_note_route" {
   api_id    = aws_apigatewayv2_api.notes_api.id
   route_key = "PUT /notes/{id}"
   target    = "integrations/${aws_apigatewayv2_integration.update_note_integration.id}"
+  authorization_type = "JWT"
+  authorizer_id      = aws_apigatewayv2_authorizer.cognito_jwt.id
 }
 
 # --------------------------------------------------------------------------------
@@ -167,6 +203,8 @@ resource "aws_apigatewayv2_route" "delete_note_route" {
   api_id    = aws_apigatewayv2_api.notes_api.id
   route_key = "DELETE /notes/{id}"
   target    = "integrations/${aws_apigatewayv2_integration.delete_note_integration.id}"
+  authorization_type = "JWT"
+  authorizer_id      = aws_apigatewayv2_authorizer.cognito_jwt.id
 }
 
 # --------------------------------------------------------------------------------

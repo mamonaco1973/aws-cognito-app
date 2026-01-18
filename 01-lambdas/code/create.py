@@ -4,8 +4,8 @@
 # Purpose:
 #   Lambda handler for creating a new note in the Notes API.
 #
-# Simplified v1 Behavior:
-#   - Uses a fixed owner value ("global") for all notes
+# Updated Behavior:
+#   - Derives owner from the Cognito JWT (access token) claim "sub"
 #   - Generates a UUID for the note ID
 #   - Stores the note in DynamoDB
 #   - Returns the created note
@@ -20,7 +20,6 @@
 #     "note":  "Note body"
 #   }
 # ================================================================================
-
 import json
 import os
 import uuid
@@ -34,7 +33,6 @@ from botocore.exceptions import ClientError
 # --------------------------------------------------------------------------------
 
 TABLE_NAME = os.environ.get("NOTES_TABLE_NAME", "").strip()
-OWNER      = "global"
 
 dynamodb = boto3.resource("dynamodb")
 
@@ -55,6 +53,26 @@ def _require_env() -> None:
     if not TABLE_NAME:
         raise ValueError("NOTES_TABLE_NAME environment variable is required")
 
+def _get_owner(event: dict) -> str:
+    """
+    Extract the authenticated user identifier from the API Gateway HTTP API
+    JWT authorizer context.
+
+    Expected path (HTTP API v2 + JWT authorizer):
+      event["requestContext"]["authorizer"]["jwt"]["claims"]["sub"]
+    """
+    try:
+        claims = event["requestContext"]["authorizer"]["jwt"]["claims"]
+        owner = str(claims.get("sub", "")).strip()
+        if not owner:
+            raise KeyError("sub claim missing")
+        return owner
+    except Exception:
+        # If this happens, either:
+        #   - the route is not protected by the JWT authorizer, or
+        #   - the request arrived without a valid Authorization header.
+        raise ValueError("Unauthorized: missing or invalid JWT claims")
+
 # --------------------------------------------------------------------------------
 # Lambda Handler
 # --------------------------------------------------------------------------------
@@ -68,6 +86,14 @@ def lambda_handler(event, context):
         table = dynamodb.Table(TABLE_NAME)
     except ValueError as exc:
         return _response(500, {"error": str(exc)})
+
+    # --------------------------------------------------------------------------
+    # Determine owner from JWT
+    # --------------------------------------------------------------------------
+    try:
+        owner = _get_owner(event)
+    except ValueError as exc:
+        return _response(401, {"error": str(exc)})
 
     # --------------------------------------------------------------------------
     # Parse request body
@@ -92,7 +118,7 @@ def lambda_handler(event, context):
     now     = datetime.now(timezone.utc).isoformat()
 
     item = {
-        "owner":      OWNER,
+        "owner":      owner,
         "id":         note_id,
         "title":      title,
         "note":       note,

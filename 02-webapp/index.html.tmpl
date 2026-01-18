@@ -233,7 +233,6 @@
 
 <script>
   // ===================== Config =====================
-  // NOTE: Keep API_BASE_URL as-is. We are gating UI on login first.
   const API_BASE_URL = "${API_BASE}";
 
   // Cognito runtime config loaded from /config.json
@@ -386,9 +385,17 @@
 
   // ===================== Helpers ====================
   async function api(path, method = "GET", body) {
+    const headers = { "Content-Type": "application/json" };
+
+    // --------------------------------------------------------------------------
+    // JWT: Send Cognito access token to API Gateway
+    // --------------------------------------------------------------------------
+    const token = sessionStorage.getItem("access_token");
+    if (token) headers["Authorization"] = "Bearer " + token;
+
     const res = await fetch(API_BASE_URL + path, {
       method,
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: body ? JSON.stringify(body) : undefined
     });
 
@@ -544,7 +551,7 @@
       await loadNotes();
       setStatus("Created note");
     } catch (e) {
-      modalStatus.textContent = "Error creating note: " + e.message;
+      modalStatus.textContent = "Error creating note: " + e.message);
     } finally {
       setBusy(false);
     }
