@@ -134,54 +134,8 @@ exit 0
 terraform init
 terraform apply -auto-approve
 
+
 cd .. || exit
-
-# --------------------------------------------------------------------------------
-# BUILD COGNITO BASED AUTHENTICATION
-# --------------------------------------------------------------------------------
-
-# # ------------------------------------------------------------------
-# # Construct S3 HTTPS URL
-# # ------------------------------------------------------------------
-# BUCKET_URL="https://${BUCKET_NAME}.s3.${REGION}.amazonaws.com"
-
-# echo "NOTE: Building Cognito Configuration"
-
-# cd 03-cognito || { echo "ERROR: 03-cognito directory missing."; exit 1; }
-
-# terraform init
-# terraform apply -auto-approve \
-#   -var="spa_origin=${BUCKET_URL}"
-
-# echo "NOTE: Reading Cognito outputs..."
-
-# COGNITO_DOMAIN_PREFIX=$(terraform output -raw cognito_domain)
-# CLIENT_ID=$(terraform output -raw app_client_id)
-
-# if [[ -z "${COGNITO_DOMAIN_PREFIX}" || -z "${CLIENT_ID}" ]]; then
-#   echo "ERROR: Failed to read Cognito outputs"
-#   exit 1
-# fi
-# COGNITO_DOMAIN="${COGNITO_DOMAIN_PREFIX}.auth.${REGION}.amazoncognito.com"
-
-# echo "NOTE: Writing config.json..."
-
-# cat > /tmp/config.json <<EOF
-# {
-#   "cognitoDomain": "${COGNITO_DOMAIN}",
-#   "clientId": "${CLIENT_ID}",
-#   "redirectUri": "${BUCKET_URL}/callback.html",
-#   "apiBaseUrl": "${API_BASE}"
-# }
-# EOF
-
-# echo "NOTE: Uploading config.json to S3..."
-
-# aws s3 cp /tmp/config.json "s3://${BUCKET_NAME}/config.json" \
-#   --content-type "application/json" \
-#   --cache-control "no-store, max-age=0"
-
-# cd .. || exit
 
 # --------------------------------------------------------------------------------
 # BUILD VALIDATION
