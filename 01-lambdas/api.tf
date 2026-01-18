@@ -43,11 +43,9 @@ resource "aws_apigatewayv2_api" "notes_api" {
 # Notes:
 #   - The issuer MUST be the Cognito *User Pool issuer* (cognito-idp), not the
 #     Hosted UI domain (amazoncognito.com).
-#   - aws_cognito_user_pool.this.endpoint returns:
-#       https://cognito-idp.<region>.amazonaws.com/<user_pool_id>
-#   - API Gateway uses this issuer to locate the discovery document at:
+#   - API Gateway requires a full URL (must include https://).
+#   - Discovery document must exist at:
 #       <issuer>/.well-known/openid-configuration
-#   - audience must match the SPA app client id.
 # --------------------------------------------------------------------------------
 resource "aws_apigatewayv2_authorizer" "cognito_jwt" {
   api_id          = aws_apigatewayv2_api.notes_api.id
@@ -58,7 +56,7 @@ resource "aws_apigatewayv2_authorizer" "cognito_jwt" {
 
   jwt_configuration {
     audience = [aws_cognito_user_pool_client.spa.id]
-    issuer   = aws_cognito_user_pool.this.endpoint
+    issuer   = "https://${aws_cognito_user_pool.this.endpoint}"
   }
 }
 
