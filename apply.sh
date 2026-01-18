@@ -32,6 +32,46 @@ terraform apply -auto-approve
 
 cd .. || exit
 
+# ------------------------------------------------------------------
+# Find buckets starting with PREFIX
+# ------------------------------------------------------------------
+
+PREFIX="notes"
+
+read -r -a BUCKETS <<< "$(aws s3api list-buckets \
+  --query "Buckets[?starts_with(Name, \`${PREFIX}\`)].Name" \
+  --output text)"
+
+# ------------------------------------------------------------------
+# Enforce exactly ONE match
+# ------------------------------------------------------------------
+if [[ "${#BUCKETS[@]}" -eq 0 ]]; then
+  echo "ERROR: No S3 bucket found starting with '${PREFIX}'" >&2
+  exit 1
+elif [[ "${#BUCKETS[@]}" -gt 1 ]]; then
+  echo "ERROR: Multiple S3 buckets found starting with '${PREFIX}':" >&2
+  for b in "${BUCKETS[@]}"; do
+    echo "  - ${b}" >&2
+  done
+  exit 1
+fi
+
+BUCKET_NAME="${BUCKETS[0]}"
+
+# ------------------------------------------------------------------
+# Get bucket region
+# ------------------------------------------------------------------
+REGION=$(aws s3api get-bucket-location \
+  --bucket "${BUCKET_NAME}" \
+  --query "LocationConstraint" \
+  --output text)
+
+# AWS returns "None" for us-east-1
+if [[ "${REGION}" == "None" ]]; then
+  REGION="us-east-1"
+fi
+
+echo "NOTE: Bucket name is ${BUCKET_NAME}"
 exit 0
 
 # --------------------------------------------------------------------------------
