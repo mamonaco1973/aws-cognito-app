@@ -10,3 +10,5 @@
 provider "aws" {
   region = "us-east-1" # Primary AWS region (N. Virginia)
 }
+
+data "aws_region" "current" {}
