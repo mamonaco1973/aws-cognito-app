@@ -133,12 +133,6 @@ if [[ -z "${COGNITO_DOMAIN_PREFIX}" || -z "${CLIENT_ID}" ]]; then
   echo "ERROR: Failed to read Cognito outputs"
   exit 1
 fi
-
-if [[ -z "${AWS_REGION}" ]]; then
-  echo "ERROR: AWS_REGION is not set"
-  exit 1
-fi
-
 COGNITO_DOMAIN="${COGNITO_DOMAIN_PREFIX}.auth.${REGION}.amazoncognito.com"
 
 echo "NOTE: Writing config.json..."
