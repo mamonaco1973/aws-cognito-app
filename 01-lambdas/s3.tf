@@ -18,7 +18,7 @@
 #   Generates a random 4-byte hexadecimal suffix to guarantee a
 #   unique S3 bucket name.
 # --------------------------------------------------------------------------------
-resource "random_id" "suffix" {
+resource "random_id" "bucket_suffix" {
   byte_length = 4
 }
 
@@ -30,7 +30,7 @@ resource "random_id" "suffix" {
 #   includes a random suffix to prevent naming conflicts.
 # --------------------------------------------------------------------------------
 resource "aws_s3_bucket" "web_bucket" {
-  bucket = "notes-web-${random_id.suffix.hex}"
+  bucket = "notes-web-${random_id.bucket_suffix.hex}"
 }
 
 # --------------------------------------------------------------------------------
