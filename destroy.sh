@@ -15,15 +15,12 @@
 export AWS_DEFAULT_REGION="us-east-1"
 set -euo pipefail
 
-# --------------------------------------------------------------------------------
-# DESTROY COGNITO CONFIGURATION
-# --------------------------------------------------------------------------------
-
-PREFIX="notes"
-
 # ------------------------------------------------------------------
 # Find buckets starting with PREFIX
 # ------------------------------------------------------------------
+
+PREFIX="notes"
+
 read -r -a BUCKETS <<< "$(aws s3api list-buckets \
   --query "Buckets[?starts_with(Name, \`${PREFIX}\`)].Name" \
   --output text)"
@@ -44,33 +41,6 @@ fi
 
 BUCKET_NAME="${BUCKETS[0]}"
 
-# ------------------------------------------------------------------
-# Get bucket region
-# ------------------------------------------------------------------
-REGION=$(aws s3api get-bucket-location \
-  --bucket "${BUCKET_NAME}" \
-  --query "LocationConstraint" \
-  --output text)
-
-# AWS returns "None" for us-east-1
-if [[ "${REGION}" == "None" ]]; then
-  REGION="us-east-1"
-fi
-
-# # ------------------------------------------------------------------
-# # Construct S3 HTTPS URL
-# # ------------------------------------------------------------------
-# BUCKET_URL="https://${BUCKET_NAME}.s3.${REGION}.amazonaws.com"
-
-# echo "NOTE: Destroying Cognito Configuration..."
-
-# cd 03-cognito || { echo "ERROR: Directory 03-cognito not found."; exit 1; }
-# terraform init
-# terraform destroy -auto-approve \
-#   -var="spa_origin=${BUCKET_URL}"
-
-# cd .. || exit
-
 # --------------------------------------------------------------------------------
 # DESTROY WEB APPLICATION
 # --------------------------------------------------------------------------------
@@ -81,7 +51,8 @@ echo "NOTE: Destroying Web Application..."
 
 cd 02-webapp || { echo "ERROR: Directory 02-webapp not found."; exit 1; }
 terraform init
-terraform destroy -auto-approve
+terraform destroy -auto-approve \
+  -var="web_bucket_name=${BUCKET_NAME}"
 cd .. || exit
 
 # --------------------------------------------------------------------------------
