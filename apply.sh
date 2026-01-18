@@ -139,7 +139,7 @@ if [[ -z "${AWS_REGION}" ]]; then
   exit 1
 fi
 
-COGNITO_DOMAIN="${COGNITO_DOMAIN_PREFIX}.auth.${AWS_REGION}.amazoncognito.com"
+COGNITO_DOMAIN="${COGNITO_DOMAIN_PREFIX}.auth.${REGION}.amazoncognito.com"
 
 echo "NOTE: Writing config.json..."
 
