@@ -124,6 +124,34 @@ terraform init
 terraform apply -auto-approve \
   -var="spa_origin=${BUCKET_URL}"
 
+
+echo "NOTE: Reading Cognito outputs..."
+
+COGNITO_DOMAIN=$(cd 03-cognito && terraform output -raw cognito_domain)
+CLIENT_ID=$(cd 03-cognito && terraform output -raw app_client_id)
+
+if [[ -z "${COGNITO_DOMAIN}" || -z "${CLIENT_ID}" ]]; then
+  echo "ERROR: Failed to read Cognito outputs"
+  exit 1
+fi
+
+echo "NOTE: Writing config.json..."
+
+cat > /tmp/config.json <<EOF
+{
+  "cognitoDomain": "${COGNITO_DOMAIN}",
+  "clientId": "${CLIENT_ID}",
+  "redirectUri": "${BUCKET_URL}/callback.html",
+  "apiBaseUrl": "${API_BASE}"
+}
+EOF
+
+echo "NOTE: Uploading config.json to S3..."
+
+aws s3 cp /tmp/config.json "s3://${BUCKET_NAME}/config.json" \
+  --content-type "application/json" \
+  --cache-control "no-store, max-age=0"
+
 cd .. || exit
 
 # --------------------------------------------------------------------------------
