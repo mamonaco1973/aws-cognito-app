@@ -41,8 +41,13 @@ resource "aws_apigatewayv2_api" "notes_api" {
 #   Configures an HTTP API JWT authorizer that validates Cognito access tokens.
 #
 # Notes:
-#   - Uses the Cognito Hosted UI domain + region to build the issuer.
-#   - Uses the SPA app client id as the JWT audience.
+#   - The issuer MUST be the Cognito *User Pool issuer* (cognito-idp), not the
+#     Hosted UI domain (amazoncognito.com).
+#   - aws_cognito_user_pool.this.endpoint returns:
+#       https://cognito-idp.<region>.amazonaws.com/<user_pool_id>
+#   - API Gateway uses this issuer to locate the discovery document at:
+#       <issuer>/.well-known/openid-configuration
+#   - audience must match the SPA app client id.
 # --------------------------------------------------------------------------------
 resource "aws_apigatewayv2_authorizer" "cognito_jwt" {
   api_id          = aws_apigatewayv2_api.notes_api.id
@@ -53,11 +58,7 @@ resource "aws_apigatewayv2_authorizer" "cognito_jwt" {
 
   jwt_configuration {
     audience = [aws_cognito_user_pool_client.spa.id]
-    issuer = format(
-      "https://%s.auth.%s.amazoncognito.com/",
-      aws_cognito_user_pool_domain.this.domain,
-      data.aws_region.current.id
-    )
+    issuer   = aws_cognito_user_pool.this.endpoint
   }
 }
 
