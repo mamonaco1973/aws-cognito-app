@@ -102,34 +102,42 @@ resource "aws_cognito_user_pool_client" "spa" {
 # Outputs
 # ================================================================================================
 
-output "user_pool_id" {
-  value = aws_cognito_user_pool.this.id
+# output "user_pool_id" {
+#   value = aws_cognito_user_pool.this.id
+# }
+
+# output "user_pool_client_id" {
+#   value = aws_cognito_user_pool_client.spa.id
+# }
+
+# output "hosted_ui_base" {
+#   value = "https://${aws_cognito_user_pool_domain.this.domain}.auth.${var.region}.amazoncognito.com"
+# }
+
+# output "hosted_ui_login_url" {
+#   value = join("", [
+#     "https://", aws_cognito_user_pool_domain.this.domain, ".auth.", var.region, ".amazoncognito.com",
+#     "/oauth2/authorize",
+#     "?client_id=", aws_cognito_user_pool_client.spa.id,
+#     "&response_type=code",
+#     "&scope=openid+email+profile",
+#     "&redirect_uri=", urlencode("${var.spa_origin}/index.html")
+#   ])
+# }
+
+# output "hosted_ui_logout_url" {
+#   value = join("", [
+#     "https://", aws_cognito_user_pool_domain.this.domain, ".auth.", var.region, ".amazoncognito.com",
+#     "/logout",
+#     "?client_id=", aws_cognito_user_pool_client.spa.id,
+#     "&logout_uri=", urlencode("${var.spa_origin}/index.html")
+#   ])
+# }
+
+output "cognito_domain" {
+  value = aws_cognito_user_pool_domain.this.domain
 }
 
-output "user_pool_client_id" {
+output "app_client_id" {
   value = aws_cognito_user_pool_client.spa.id
-}
-
-output "hosted_ui_base" {
-  value = "https://${aws_cognito_user_pool_domain.this.domain}.auth.${var.region}.amazoncognito.com"
-}
-
-output "hosted_ui_login_url" {
-  value = join("", [
-    "https://", aws_cognito_user_pool_domain.this.domain, ".auth.", var.region, ".amazoncognito.com",
-    "/oauth2/authorize",
-    "?client_id=", aws_cognito_user_pool_client.spa.id,
-    "&response_type=code",
-    "&scope=openid+email+profile",
-    "&redirect_uri=", urlencode("${var.spa_origin}/index.html")
-  ])
-}
-
-output "hosted_ui_logout_url" {
-  value = join("", [
-    "https://", aws_cognito_user_pool_domain.this.domain, ".auth.", var.region, ".amazoncognito.com",
-    "/logout",
-    "?client_id=", aws_cognito_user_pool_client.spa.id,
-    "&logout_uri=", urlencode("${var.spa_origin}/index.html")
-  ])
 }
