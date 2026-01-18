@@ -130,7 +130,8 @@ cat > config.json <<EOF
 EOF
 
 terraform init
-terraform apply -auto-approve
+terraform apply -auto-approve \
+  -var="web_bucket_name=${BUCKET_NAME}"
 
 cd .. || exit
 
