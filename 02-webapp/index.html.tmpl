@@ -551,7 +551,7 @@
       await loadNotes();
       setStatus("Created note");
     } catch (e) {
-      modalStatus.textContent = "Error creating note: " + e.message);
+      modalStatus.textContent = "Error creating note: " + e.message;
     } finally {
       setBusy(false);
     }
