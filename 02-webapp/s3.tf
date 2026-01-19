@@ -58,7 +58,7 @@ resource "aws_s3_object" "callback_html" {
 # ------------------------------------------------------------------------------
 output "website_https_url" {
   description = "HTTPS URL to index.html (regional S3 REST endpoint)."
-  value       = format(
+  value = format(
     "https://%s.s3.%s.amazonaws.com/index.html",
     var.web_bucket_name,
     data.aws_region.current.id

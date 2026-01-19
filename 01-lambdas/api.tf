@@ -26,7 +26,7 @@ resource "aws_apigatewayv2_api" "notes_api" {
   protocol_type = "HTTP"
 
   cors_configuration {
-    allow_origins  = ["*"]  # Restrict to domain in production
+    allow_origins  = ["*"] # Restrict to domain in production
     allow_methods  = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
     allow_headers  = ["content-type", "authorization"]
     expose_headers = ["content-type"]
@@ -142,9 +142,9 @@ resource "aws_apigatewayv2_integration" "delete_note_integration" {
 #   Defines the POST /notes route mapped to the create integration.
 # --------------------------------------------------------------------------------
 resource "aws_apigatewayv2_route" "create_note_route" {
-  api_id    = aws_apigatewayv2_api.notes_api.id
-  route_key = "POST /notes"
-  target    = "integrations/${aws_apigatewayv2_integration.create_note_integration.id}"
+  api_id             = aws_apigatewayv2_api.notes_api.id
+  route_key          = "POST /notes"
+  target             = "integrations/${aws_apigatewayv2_integration.create_note_integration.id}"
   authorization_type = "JWT"
   authorizer_id      = aws_apigatewayv2_authorizer.cognito_jwt.id
 }
@@ -156,9 +156,9 @@ resource "aws_apigatewayv2_route" "create_note_route" {
 #   Defines the GET /notes route mapped to the list integration.
 # --------------------------------------------------------------------------------
 resource "aws_apigatewayv2_route" "list_notes_route" {
-  api_id    = aws_apigatewayv2_api.notes_api.id
-  route_key = "GET /notes"
-  target    = "integrations/${aws_apigatewayv2_integration.list_notes_integration.id}"
+  api_id             = aws_apigatewayv2_api.notes_api.id
+  route_key          = "GET /notes"
+  target             = "integrations/${aws_apigatewayv2_integration.list_notes_integration.id}"
   authorization_type = "JWT"
   authorizer_id      = aws_apigatewayv2_authorizer.cognito_jwt.id
 
@@ -171,9 +171,9 @@ resource "aws_apigatewayv2_route" "list_notes_route" {
 #   Defines the GET /notes/{id} route mapped to the get integration.
 # --------------------------------------------------------------------------------
 resource "aws_apigatewayv2_route" "get_note_route" {
-  api_id    = aws_apigatewayv2_api.notes_api.id
-  route_key = "GET /notes/{id}"
-  target    = "integrations/${aws_apigatewayv2_integration.get_note_integration.id}"
+  api_id             = aws_apigatewayv2_api.notes_api.id
+  route_key          = "GET /notes/{id}"
+  target             = "integrations/${aws_apigatewayv2_integration.get_note_integration.id}"
   authorization_type = "JWT"
   authorizer_id      = aws_apigatewayv2_authorizer.cognito_jwt.id
 }
@@ -185,9 +185,9 @@ resource "aws_apigatewayv2_route" "get_note_route" {
 #   Defines the PUT /notes/{id} route mapped to the update integration.
 # --------------------------------------------------------------------------------
 resource "aws_apigatewayv2_route" "update_note_route" {
-  api_id    = aws_apigatewayv2_api.notes_api.id
-  route_key = "PUT /notes/{id}"
-  target    = "integrations/${aws_apigatewayv2_integration.update_note_integration.id}"
+  api_id             = aws_apigatewayv2_api.notes_api.id
+  route_key          = "PUT /notes/{id}"
+  target             = "integrations/${aws_apigatewayv2_integration.update_note_integration.id}"
   authorization_type = "JWT"
   authorizer_id      = aws_apigatewayv2_authorizer.cognito_jwt.id
 }
@@ -199,9 +199,9 @@ resource "aws_apigatewayv2_route" "update_note_route" {
 #   Defines the DELETE /notes/{id} route mapped to the delete integration.
 # --------------------------------------------------------------------------------
 resource "aws_apigatewayv2_route" "delete_note_route" {
-  api_id    = aws_apigatewayv2_api.notes_api.id
-  route_key = "DELETE /notes/{id}"
-  target    = "integrations/${aws_apigatewayv2_integration.delete_note_integration.id}"
+  api_id             = aws_apigatewayv2_api.notes_api.id
+  route_key          = "DELETE /notes/{id}"
+  target             = "integrations/${aws_apigatewayv2_integration.delete_note_integration.id}"
   authorization_type = "JWT"
   authorizer_id      = aws_apigatewayv2_authorizer.cognito_jwt.id
 }
