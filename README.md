@@ -25,7 +25,7 @@ routes authenticated requests to dedicated Lambda functions, DynamoDB provides
 fully managed persistence, and AWS handles scaling, availability, and fault
 tolerance automatically.
 
-![diagram](aws-crud-example.png)
+![diagram](aws-cognito-app.png)
 
 ## Key capabilities demonstrated
 
