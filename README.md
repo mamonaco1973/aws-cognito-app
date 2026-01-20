@@ -55,6 +55,30 @@ The **Notes API** exposes REST-style CRUD endpoints through **Amazon API Gateway
 must include a valid **Authorization: Bearer <JWT>** header issued by the
 Cognito User Pool.
 
+### API Endpoint Summary (Authenticated)
+
+| Method | Path | Purpose | Auth | DynamoDB Operation |
+|------|------|--------|------|--------------------|
+| POST | `/notes` | Create a new note for the authenticated user | Required | `PutItem` |
+| GET | `/notes` | List all notes owned by the authenticated user | Required | `Query` (owner = JWT `sub`) |
+| GET | `/notes/{id}` | Retrieve a single note by ID | Required | `GetItem` (owner + id) |
+| PUT | `/notes/{id}` | Update an existing note owned by the authenticated user | Required | `UpdateItem` |
+| DELETE | `/notes/{id}` | Delete a note by ID owned by the authenticated user | Required | `DeleteItem` |
+
+
+### Request & Response Characteristics (Authenticated)
+
+| Aspect | Behavior |
+|-----|--------|
+| Authentication | Amazon Cognito JWT authorizer |
+| Authorization | Enforced via DynamoDB partition key (`owner`) |
+| Identity Source | JWT `sub` claim |
+| Content Type | `application/json` |
+| Owner Model | Derived from authenticated user |
+| Response Format | JSON |
+| Clients | curl, browser, any HTTP client |
+| Error Handling | Standard HTTP status codes |
+
 Each request is authenticated at the API Gateway layer before reaching Lambda.
 The authenticated user identity is derived from the JWT and used to scope data
 access in DynamoDB.
