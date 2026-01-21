@@ -21,7 +21,7 @@
 #   policy allows the Lambda service to assume this role.
 # --------------------------------------------------------------------------------
 resource "aws_iam_role" "lambda_get_role" {
-  name = "notes-get-role"
+  name = "notes-cognito-get-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"

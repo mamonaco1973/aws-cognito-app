@@ -20,7 +20,7 @@
 #   role at runtime.
 # --------------------------------------------------------------------------------
 resource "aws_iam_role" "lambda_create_role" {
-  name = "notes-create-role"
+  name = "notes-cognito-create-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"

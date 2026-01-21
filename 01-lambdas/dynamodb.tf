@@ -34,7 +34,7 @@
 #   - Sort key     : id    (string, UUID)
 # --------------------------------------------------------------------------------
 resource "aws_dynamodb_table" "notes" {
-  name         = "notes"
+  name         = "notes-cognito"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "owner"
   range_key    = "id"

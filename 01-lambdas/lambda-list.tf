@@ -20,7 +20,7 @@
 #   role at runtime.
 # --------------------------------------------------------------------------------
 resource "aws_iam_role" "lambda_list_role" {
-  name = "notes-list-role"
+  name = "notes-cognito-list-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"

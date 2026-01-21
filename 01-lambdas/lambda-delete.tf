@@ -20,7 +20,7 @@
 #   role at runtime.
 # --------------------------------------------------------------------------------
 resource "aws_iam_role" "lambda_delete_role" {
-  name = "notes-delete-role"
+  name = "notes-cognito-delete-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
