@@ -22,7 +22,7 @@
 #   CORS configuration allows client access during development.
 # --------------------------------------------------------------------------------
 resource "aws_apigatewayv2_api" "notes_api" {
-  name          = "notes-api"
+  name          = "notes-api-cognito"
   protocol_type = "HTTP"
 
   cors_configuration {
