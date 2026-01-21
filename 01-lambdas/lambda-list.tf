@@ -76,7 +76,7 @@ resource "aws_iam_role_policy" "lambda_list_dynamo" {
 #   list.lambda_handler  (code/list.py)
 # --------------------------------------------------------------------------------
 resource "aws_lambda_function" "lambda_list" {
-  function_name    = "list-notes"
+  function_name    = "list-notes-cognito"
   role             = aws_iam_role.lambda_list_role.arn
   runtime          = "python3.14"
   handler          = "list.lambda_handler"

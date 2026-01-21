@@ -74,7 +74,7 @@ resource "aws_iam_role_policy" "lambda_get_dynamo" {
 #   note from DynamoDB using owner + id and returns it to API Gateway.
 # --------------------------------------------------------------------------------
 resource "aws_lambda_function" "lambda_get" {
-  function_name    = "get-note"
+  function_name    = "get-note-cognito"
   role             = aws_iam_role.lambda_get_role.arn
   runtime          = "python3.14"
   handler          = "get.lambda_handler"

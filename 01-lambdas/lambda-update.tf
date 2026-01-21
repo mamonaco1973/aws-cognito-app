@@ -77,7 +77,7 @@ resource "aws_iam_role_policy" "lambda_update_dynamo" {
 #   update.lambda_handler  (code/update.py)
 # --------------------------------------------------------------------------------
 resource "aws_lambda_function" "lambda_update" {
-  function_name    = "update-note"
+  function_name    = "update-note-cognito"
   role             = aws_iam_role.lambda_update_role.arn
   runtime          = "python3.14"
   handler          = "update.lambda_handler"

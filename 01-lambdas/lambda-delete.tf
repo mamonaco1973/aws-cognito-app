@@ -76,7 +76,7 @@ resource "aws_iam_role_policy" "lambda_delete_dynamo" {
 #   delete.lambda_handler  (code/delete.py)
 # --------------------------------------------------------------------------------
 resource "aws_lambda_function" "lambda_delete" {
-  function_name    = "delete-note"
+  function_name    = "delete-note-cognito"
   role             = aws_iam_role.lambda_delete_role.arn
   runtime          = "python3.14"
   handler          = "delete.lambda_handler"

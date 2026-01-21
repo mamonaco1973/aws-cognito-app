@@ -76,7 +76,7 @@ resource "aws_iam_role_policy" "lambda_create_dynamo" {
 #   create.lambda_handler  (code/create.py)
 # --------------------------------------------------------------------------------
 resource "aws_lambda_function" "lambda_create" {
-  function_name    = "create-note"
+  function_name    = "create-note-cognito"
   role             = aws_iam_role.lambda_create_role.arn
   runtime          = "python3.14"
   handler          = "create.lambda_handler"
