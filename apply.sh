@@ -144,11 +144,11 @@ BUCKET_URL="https://${BUCKET_NAME}.s3.${REGION}.amazonaws.com"
 # injection into the web client template and config.json.
 # ------------------------------------------------------------------------------
 API_ID=$(aws apigatewayv2 get-apis \
-  --query "Items[?Name=='notes-api'].ApiId" \
+  --query "Items[?Name=='notes-api-cognito'].ApiId" \
   --output text)
 
 if [[ -z "${API_ID}" || "${API_ID}" == "None" ]]; then
-  echo "ERROR: No API found with name 'notes-api'"
+  echo "ERROR: No API found with name 'notes-api-cognito'"
   exit 1
 fi
 
