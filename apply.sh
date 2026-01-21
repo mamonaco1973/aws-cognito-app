@@ -86,7 +86,7 @@ cd .. || exit 1
 # Finds the S3 bucket used for hosting the web client by matching a
 # known prefix. Exactly one bucket must match.
 # ------------------------------------------------------------------------------
-PREFIX="notes"
+PREFIX="cnotes"
 
 read -r -a BUCKETS <<< "$(aws s3api list-buckets \
   --query "Buckets[?starts_with(Name, \`${PREFIX}\`)].Name" \

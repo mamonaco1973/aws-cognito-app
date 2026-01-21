@@ -30,7 +30,7 @@ resource "random_id" "bucket_suffix" {
 #   includes a random suffix to prevent naming conflicts.
 # --------------------------------------------------------------------------------
 resource "aws_s3_bucket" "web_bucket" {
-  bucket = "notes-web-${random_id.bucket_suffix.hex}"
+  bucket = "cnotes-web-${random_id.bucket_suffix.hex}"
 }
 
 # --------------------------------------------------------------------------------

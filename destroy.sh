@@ -46,7 +46,7 @@ set -euo pipefail
 # Finds the S3 bucket hosting the static web client by matching a
 # known prefix. Exactly one bucket must match.
 # ------------------------------------------------------------------------------
-PREFIX="notes"
+PREFIX="cnotes"
 
 read -r -a BUCKETS <<< "$(aws s3api list-buckets \
   --query "Buckets[?starts_with(Name, \`${PREFIX}\`)].Name" \
