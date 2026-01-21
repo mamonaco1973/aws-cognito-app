@@ -52,7 +52,7 @@ resource "aws_iam_role_policy_attachment" "lambda_create_basic" {
 #   items to the DynamoDB notes table.
 # --------------------------------------------------------------------------------
 resource "aws_iam_role_policy" "lambda_create_dynamo" {
-  name = "notes-create-dynamo"
+  name = "notes-cognito-create-dynamo"
   role = aws_iam_role.lambda_create_role.id
 
   policy = jsonencode({

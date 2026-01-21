@@ -53,7 +53,7 @@ resource "aws_iam_role_policy_attachment" "lambda_get_basic" {
 #   Required for retrieving notes using (owner, id).
 # --------------------------------------------------------------------------------
 resource "aws_iam_role_policy" "lambda_get_dynamo" {
-  name = "notes-get-dynamo"
+  name = "notes-cognito-get-dynamo"
   role = aws_iam_role.lambda_get_role.id
 
   policy = jsonencode({

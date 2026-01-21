@@ -52,7 +52,7 @@ resource "aws_iam_role_policy_attachment" "lambda_delete_basic" {
 #   items from the DynamoDB notes table.
 # --------------------------------------------------------------------------------
 resource "aws_iam_role_policy" "lambda_delete_dynamo" {
-  name = "notes-delete-dynamo"
+  name = "notes-cognito-delete-dynamo"
   role = aws_iam_role.lambda_delete_role.id
 
   policy = jsonencode({

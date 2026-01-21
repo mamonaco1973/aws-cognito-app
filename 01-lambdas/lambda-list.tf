@@ -52,7 +52,7 @@ resource "aws_iam_role_policy_attachment" "lambda_list_basic" {
 #   items from the DynamoDB notes table.
 # --------------------------------------------------------------------------------
 resource "aws_iam_role_policy" "lambda_list_dynamo" {
-  name = "notes-list-dynamo"
+  name = "notes-cognito-list-dynamo"
   role = aws_iam_role.lambda_list_role.id
 
   policy = jsonencode({

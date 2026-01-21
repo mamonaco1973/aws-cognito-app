@@ -52,7 +52,7 @@ resource "aws_iam_role_policy_attachment" "lambda_update_basic" {
 #   items in the DynamoDB notes table.
 # --------------------------------------------------------------------------------
 resource "aws_iam_role_policy" "lambda_update_dynamo" {
-  name = "notes-update-dynamo"
+  name = "notes-cognito-update-dynamo"
   role = aws_iam_role.lambda_update_role.id
 
   policy = jsonencode({
