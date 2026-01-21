@@ -60,3 +60,34 @@ fi
 BUCKET_URL="https://${BUCKET_NAME}.s3.${REGION}.amazonaws.com"
 
 echo "NOTE: Test application URL - ${BUCKET_URL}/index.html"
+
+# ------------------------------------------------------------------------------
+# Step 2: Print Google OAuth values needed for Cognito federation.
+# ------------------------------------------------------------------------------
+# Google Console needs:
+#   - Authorized JavaScript origins: where your SPA runs (this S3 origin)
+#   - Authorized redirect URIs: where Google sends the auth response (Cognito)
+# ------------------------------------------------------------------------------
+
+# Pull Cognito domain prefix from Terraform outputs (01-lambdas)
+COGNITO_DOMAIN="$(terraform -chdir=01-lambdas output -raw cognito_domain 2>/dev/null)"
+
+if [[ -z "${COGNITO_DOMAIN}" ]]; then
+  echo "ERROR: Could not read Terraform output 'cognito_domain' from 01-lambdas."
+  echo "       Run './apply.sh' (or 'terraform -chdir=01-lambdas apply') first."
+  exit 1
+fi
+
+COGNITO_IDP_RESPONSE_URL="https://${COGNITO_DOMAIN}.auth.${REGION}.amazoncognito.com/oauth2/idpresponse"
+
+echo ""
+echo "=============================================================================="
+echo "Google Cloud Console (OAuth Client) values"
+echo "=============================================================================="
+echo "Authorized JavaScript origins:"
+echo "  ${BUCKET_URL}"
+echo ""
+echo "Authorized redirect URIs:"
+echo "  ${COGNITO_IDP_RESPONSE_URL}"
+echo "=============================================================================="
+echo ""
