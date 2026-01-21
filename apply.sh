@@ -246,8 +246,8 @@ cd .. || exit 1
 # ------------------------------------------------------------------------------
 # Enable once validate.sh is implemented.
 # ------------------------------------------------------------------------------
-# echo "NOTE: Running post-deployment validation..."
-# ./validate.sh
+echo "NOTE: Running post-deployment validation..."
+./validate.sh
 
 # ================================================================================
 # END OF SCRIPT
