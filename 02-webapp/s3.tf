@@ -53,6 +53,18 @@ resource "aws_s3_object" "callback_html" {
   cache_control = "no-store, max-age=0"
 }
 
+# ------------------------------------------------------------------------------
+# Upload: favicon.ico
+# ------------------------------------------------------------------------------
+resource "aws_s3_object" "favicon" {
+  bucket        = var.web_bucket_name
+  key           = "favicon.ico"
+  source        = "${path.module}/favicon.ico"
+  content_type  = "image/x-icon"
+  etag          = filemd5("${path.module}/favicon.ico")
+  cache_control = "no-store, max-age=0"
+}
+
 # # ------------------------------------------------------------------------------
 # # Output: website_https_url
 # # ------------------------------------------------------------------------------
