@@ -62,7 +62,34 @@ BUCKET_URL="https://${BUCKET_NAME}.s3.${REGION}.amazonaws.com"
 echo "NOTE: Test application URL - ${BUCKET_URL}/index.html"
 
 # ------------------------------------------------------------------------------
-# Step 2: Print Google OAuth values needed for Cognito federation.
+# Step 2: Discover API Gateway endpoint
+# ------------------------------------------------------------------------------
+export AWS_DEFAULT_REGION="us-east-1"
+
+API_ID=$(aws apigatewayv2 get-apis \
+  --query "Items[?Name=='notes-api-cognito'].ApiId" \
+  --output text)
+
+if [[ -z "${API_ID}" || "${API_ID}" == "None" ]]; then
+  echo "ERROR: No API found with name 'notes-api-cognito'"
+  exit 1
+fi
+
+API_BASE=$(aws apigatewayv2 get-api \
+  --api-id "${API_ID}" \
+  --query "ApiEndpoint" \
+  --output text)
+
+echo ""
+echo "================================================================================="
+echo "  Deployment validated!"
+echo "================================================================================="
+echo "  API : ${API_BASE}"
+echo "  Web : ${BUCKET_URL}/index.html"
+echo "================================================================================="
+
+# ------------------------------------------------------------------------------
+# Step 3: Print Google OAuth values needed for Cognito federation.
 # ------------------------------------------------------------------------------
 # Google Console needs:
 #   - Authorized JavaScript origins: where your SPA runs (this S3 origin)
