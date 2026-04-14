@@ -77,7 +77,7 @@ resource "aws_lambda_function" "lambda_get" {
   function_name    = "get-note-cognito"
   role             = aws_iam_role.lambda_get_role.arn
   runtime          = "python3.14"
-  handler          = "get.lambda_handler"
+  handler          = "notes.get_handler"
   filename         = data.archive_file.lambdas_zip.output_path
   source_code_hash = data.archive_file.lambdas_zip.output_base64sha256
   timeout          = 15

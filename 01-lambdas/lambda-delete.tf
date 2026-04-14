@@ -73,13 +73,13 @@ resource "aws_iam_role_policy" "lambda_delete_dynamo" {
 #   deletes a note in DynamoDB and returns a simple confirmation.
 #
 # Handler:
-#   delete.lambda_handler  (code/delete.py)
+#   notes.delete_handler  (code/notes.py)
 # --------------------------------------------------------------------------------
 resource "aws_lambda_function" "lambda_delete" {
   function_name    = "delete-note-cognito"
   role             = aws_iam_role.lambda_delete_role.arn
   runtime          = "python3.14"
-  handler          = "delete.lambda_handler"
+  handler          = "notes.delete_handler"
   filename         = data.archive_file.lambdas_zip.output_path
   source_code_hash = data.archive_file.lambdas_zip.output_base64sha256
   timeout          = 15

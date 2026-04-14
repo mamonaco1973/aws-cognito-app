@@ -73,13 +73,13 @@ resource "aws_iam_role_policy" "lambda_create_dynamo" {
 #   creates new notes in DynamoDB and returns the created item.
 #
 # Handler:
-#   create.lambda_handler  (code/create.py)
+#   notes.create_handler  (code/notes.py)
 # --------------------------------------------------------------------------------
 resource "aws_lambda_function" "lambda_create" {
   function_name    = "create-note-cognito"
   role             = aws_iam_role.lambda_create_role.arn
   runtime          = "python3.14"
-  handler          = "create.lambda_handler"
+  handler          = "notes.create_handler"
   filename         = data.archive_file.lambdas_zip.output_path
   source_code_hash = data.archive_file.lambdas_zip.output_base64sha256
   timeout          = 15
