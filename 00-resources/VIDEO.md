@@ -30,6 +30,6 @@ https://github.com/mamonaco1973/aws-cognito-app/blob/main/README.md
 TIMESTAMPS
 00:00 Introduction
 00:18 Architecture
-00:55 Build the Code
-01:15 Build Results
-01:50 Demo
+00:41 Build the Code
+00:58 Build Results
+01:38 Demo
