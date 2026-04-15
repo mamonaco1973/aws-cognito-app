@@ -24,49 +24,25 @@
 
 "Let's walk through the architecture before we build."
 
-[ Highlight browser and S3 bucket ]
+[ Highlight left block: Browser + S3 + Cognito ]
 
-"The user opens a static web app served from S3. Unlike the previous project, this app has two pages — index.html and callback.html."
+"The user opens a static web app from S3 and signs in with Cognito."
 
-[ Highlight Cognito ]
+[ Highlight JWT arrow ]
 
-"When the user clicks Login, the browser redirects to the Cognito Hosted UI. The user signs in there — we never handle credentials ourselves."
+"Cognito returns a JWT — and that token is sent with every API request."
 
-[ Highlight callback.html ]
+[ Highlight API Gateway ]
 
-"After login, Cognito redirects back to callback.html with an authorization code. The page exchanges that code for tokens using the PKCE flow — and stores the access token in sessionStorage."
+"API Gateway validates the token before the request is allowed through."
 
-[ Highlight API Gateway → JWT authorizer ]
+[ Highlight Lambda ]
 
-"Every API call from the frontend includes that access token as a Bearer header. API Gateway validates it against the Cognito JWKS endpoint before Lambda ever runs."
+"Lambda handles the request and runs the application logic."
 
-[ Highlight Lambda → DynamoDB ]
+[ Highlight DynamoDB ]
 
-"Lambda extracts the Cognito sub claim from the verified JWT and uses it as the DynamoDB partition key. Each user's notes are completely isolated at the storage layer."
-
----
-
-## Build the Code
-
-[ Terminal — running ./apply.sh ]
-
-"The whole deployment is one script — apply.sh. Two phases."
-
-[ Terminal — Phase 1: Terraform apply in 01-lambdas ]
-
-"Phase one: Terraform provisions the Cognito User Pool, Hosted UI domain, and app client — then the DynamoDB table, all five Lambda functions, and the API Gateway with its JWT authorizer."
-
-[ Terminal — config.json being generated ]
-
-"Between phases, the script reads the Cognito and API Gateway outputs from Terraform and writes config.json — the Cognito domain, client ID, redirect URI, and API base URL that the frontend needs at runtime."
-
-[ Terminal — Phase 2: Terraform apply in 02-webapp ]
-
-"Phase two: Terraform uploads index.html, callback.html, and config.json to S3. The site is live."
-
-[ Terminal — deployment complete, URL printed ]
-
-"Website URL. Done."
+"DynamoDB stores the data — the owner field is scoped to the authenticated user."
 
 ---
 
@@ -82,31 +58,35 @@
 
 [ AWS Console — Cognito App Client ]
 
-"The app client is configured for Authorization Code with PKCE — no client secret, safe for a browser SPA."
+The app client is configured to authorize API access from a Single Page Application.
 
-[ AWS Console — API Gateway, notes-api, Authorizers tab ]
+[ AWS Console — API Gateway]
 
-"Next — the API Gateway. The JWT authorizer is attached here. It validates the issuer against the Cognito User Pool endpoint and the audience against the app client ID."
+Next — the API Gateway. 
 
-[ Show Routes ]
+[ Show Authorizers Section]
 
-"The five routes are unchanged from the previous project — each one wired to its own Lambda."
+The JWT authorizer is attached here. 
+
+[Show API call] 
+
+API Gateway validates the caller's Bearer token before calling the lambda.
 
 [ AWS Console — Lambda functions list ]
 
-"Five Lambda functions, one per operation, each with a least-privilege IAM role."
+"Five Lambda functions are defined, each with least-privilege access."
 
 [ AWS Console — DynamoDB table, notes-cognito ]
 
-"The DynamoDB table looks the same, but the partition key is now the Cognito sub claim — a unique, stable ID per user — instead of the hardcoded 'global' owner from before."
+"DynamoDB stores the notes — partitioned by user"."
 
 [ AWS Console — S3 bucket ]
 
-"Finally, the S3 bucket hosts the three frontend files — index.html, callback.html, and the generated config.json."
+"Finally, S3 hosts the frontend — index.html, callback.html, and config.json."
 
 [ Browser — Notes Demo login page ]
 
-"Open the website URL to launch the app."
+"Navigate to the URL to launch the test app."
 
 ---
 
@@ -114,7 +94,7 @@
 
 [ Browser — Notes Demo, Login button visible ]
 
-"The app loads. We're not logged in yet — the note list is empty and the controls are disabled."
+"When the app loads initially we are not logged in yet — the note list is empty and the controls are disabled"
 
 [ Clicking Login — Cognito Hosted UI opens ]
 

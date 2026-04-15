@@ -1,6 +1,6 @@
 #AWS #Serverless #AWSLambda #DynamoDB #APIGateway #Cognito #Terraform #Python #CRUD
 
-*Secure your Serverless API in AWS (Cognito + API Gateway)*
+*Secure a Serverless API in AWS (Cognito + API Gateway)*
 
 Secure a serverless notes API on AWS using Amazon Cognito, API Gateway JWT authorization, and a PKCE OAuth2 flow — all provisioned with Terraform and deployed with a single script. The backend runs on five Python Lambda functions, DynamoDB stores the data, and a static S3 frontend handles the Cognito login redirect and token exchange.
 
@@ -29,7 +29,7 @@ https://github.com/mamonaco1973/aws-cognito-app/blob/main/README.md
 
 TIMESTAMPS
 00:00 Introduction
-00:22 Architecture
+00:18 Architecture
 00:55 Build the Code
 01:15 Build Results
 01:50 Demo
